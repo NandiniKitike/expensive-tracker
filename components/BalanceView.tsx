@@ -15,7 +15,7 @@ export default function BalanceView({ balances }: BalanceViewProps): JSX.Element
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">💰 Current Balances</h2>
+        <h2 className="text-xl font-semibold"> Current Balances</h2>
         <div className="text-sm text-gray-600">
           Total: ₹{totalExpenses.toFixed(2)}
         </div>

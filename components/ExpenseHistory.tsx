@@ -616,9 +616,7 @@ export default function ExpenseHistory({
         {/* Enhanced Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-r from-violet-500 to-purple-500 p-2 rounded-xl shadow-lg">
-              <span className="text-xl">📊</span>
-            </div>
+           
             <div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 Expense History
@@ -687,7 +685,7 @@ export default function ExpenseHistory({
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="🔍 Search description, location, or payer..."
+                  placeholder=" Search description, location, or payer..."
                   className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200"
                 />
                 {searchTerm && (
@@ -709,8 +707,8 @@ export default function ExpenseHistory({
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                <span>🎛️</span>
-                <span>Filters</span>
+               
+                <span>Apply Filters</span>
                 {hasActiveFilters && (
                   <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
                     Active
@@ -725,7 +723,7 @@ export default function ExpenseHistory({
             <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                  <span>🎯</span> Advanced Filters
+                  Advanced Filters
                 </h3>
                 {hasActiveFilters && (
                   <button
@@ -851,7 +849,7 @@ export default function ExpenseHistory({
         {Object.keys(statistics.monthlySpending).length > 0 && (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
             <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-              <span>📅</span> Month-wise Spending Summary
+              Month-wise Spending Summary
             </h3>
             <div className="space-y-4">
               {Object.entries(statistics.monthlySpending)
@@ -915,7 +913,7 @@ export default function ExpenseHistory({
           <div className="p-6 border-b border-slate-200">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                <span>📋</span> Expense Details
+                Expense Details
               </h3>
               <button
                 onClick={() => {
@@ -941,7 +939,7 @@ export default function ExpenseHistory({
                 }}
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-lg hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2"
               >
-                <span>📥</span>
+              
                 <span>Export ({filteredExpenses.length})</span>
               </button>
             </div>
@@ -950,8 +948,8 @@ export default function ExpenseHistory({
           <div className="max-h-96 overflow-y-auto">
             {filteredExpenses.length === 0 ? (
               <div className="p-12 text-center">
-                <div className="bg-gradient-to-r from-slate-400 to-slate-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <span className="text-2xl">🔍</span>
+                <div className="bg-gradient-to-r  rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  
                 </div>
                 <p className="text-slate-600 font-medium mb-2">No expenses found</p>
                 <p className="text-sm text-slate-500">Try adjusting your search criteria or filters</p>

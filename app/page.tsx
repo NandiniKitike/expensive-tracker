@@ -1,320 +1,3 @@
-// 'use client';
-
-// import React, { useState, useEffect } from 'react';
-// import { Toaster, toast } from 'react-hot-toast';
-// import ExpenseForm from '@/components/ExpenseForm';
-// import QRScanner from '@/components/QRScanner';
-// import BalanceView from '@/components/BalanceView';
-// import MemberManager from '@/components/MemberManager';
-// import ExpenseHistory from '@/components/ExpenseHistory';
-// import { Expense, Balance, QRExpenseData, Member } from '@/types';
-// import { calculateSplit, updateBalances } from '@/lib/utils';
-
-// // ✅ Default members (can be customized)
-// const DEFAULT_MEMBERS: Member[] = [
-//   { id: '1', name: 'John', isActive: true },
-//   { id: '2', name: 'Raj', isActive: true },
-//   { id: '3', name: 'Priya', isActive: true },
-//   { id: '4', name: 'Amit', isActive: true },
-//   { id: '5', name: 'Sarah', isActive: true },
-// ];
-
-// // ✅ Updated ViewType to include 'history'
-// type ViewType = 'menu' | 'qr' | 'manual' | 'members' | 'history';
-
-// export default function TeaTracker(): JSX.Element {
-//   const [expenses, setExpenses] = useState<Expense[]>([]);
-//   const [members, setMembers] = useState<Member[]>(DEFAULT_MEMBERS);
-//   const [balances, setBalances] = useState<Balance>({});
-//   const [currentView, setCurrentView] = useState<ViewType>('menu');
-//   const [qrData, setQrData] = useState<QRExpenseData | null>(null);
-
-//   // Initialize balances when members change
-//   useEffect(() => {
-//     const initialBalances: Balance = {};
-//     members.forEach(member => {
-//       initialBalances[member.name] = balances[member.name] || 0;
-//     });
-//     setBalances(initialBalances);
-//   }, [members]);
-
-//   // Load data from localStorage
-//   useEffect(() => {
-//     const savedExpenses = localStorage.getItem('tea-expenses');
-//     const savedMembers = localStorage.getItem('tea-members');
-//     const savedBalances = localStorage.getItem('tea-balances');
-    
-//     if (savedExpenses) {
-//       setExpenses(JSON.parse(savedExpenses));
-//     }
-//     if (savedMembers) {
-//       setMembers(JSON.parse(savedMembers));
-//     }
-//     if (savedBalances) {
-//       setBalances(JSON.parse(savedBalances));
-//     }
-//   }, []);
-
-//   // Save data to localStorage
-//   useEffect(() => {
-//     localStorage.setItem('tea-expenses', JSON.stringify(expenses));
-//     localStorage.setItem('tea-members', JSON.stringify(members));
-//     localStorage.setItem('tea-balances', JSON.stringify(balances));
-//   }, [expenses, members, balances]);
-
-//   const activeMemberNames = members.filter(m => m.isActive).map(m => m.name);
-
-//   const addExpense = (expenseData: QRExpenseData): void => {
-//     if (!expenseData.amount || !expenseData.paidBy) {
-//       toast.error('Please fill all required fields');
-//       return;
-//     }
-
-//     const perPersonCost = calculateSplit(expenseData.amount, activeMemberNames.length);
-    
-//     const newExpense: Expense = {
-//       id: Date.now().toString(),
-//       amount: expenseData.amount,
-//       description: expenseData.description || 'Tea',
-//       paidBy: expenseData.paidBy,
-//       date: new Date().toLocaleDateString(),
-//       time: new Date().toLocaleTimeString(),
-//       location: expenseData.location,
-//       billRef: expenseData.billRef || undefined,
-//       perPersonCost,
-//       qrSource: expenseData.qrSource,
-//       autoFilled: expenseData.autoFilled || false
-//     };
-
-//     setExpenses(prev => [newExpense, ...prev]);
-//     setBalances(prev => updateBalances(prev, newExpense));
-
-//     toast.success(`✅ Expense added! ₹${perPersonCost.toFixed(2)} per person`);
-//     setCurrentView('menu');
-//     setQrData(null);
-//   };
-
-//   const handleQRScanned = (scannedData: QRExpenseData): void => {
-//     setQrData(scannedData);
-//     setCurrentView('manual');
-    
-//     if (scannedData.hasAmount && scannedData.amount) {
-//       toast.success(`✅ Found ₹${scannedData.amount} at ${scannedData.merchant || 'Tea Shop'}`);
-//     } else {
-//       toast(`📍 Found ${scannedData.merchant || 'Tea Shop'} - please enter amount`, {
-//         icon: 'ℹ️',
-//         style: {
-//           backgroundColor: '#e3f2fd',
-//           color: '#1976d2',
-//           border: '1px solid #bbdefb'
-//         }
-//       });
-//     }
-//   };
-
-//   const resetToMenu = (): void => {
-//     setCurrentView('menu');
-//     setQrData(null);
-//   };
-
-//   const handleMembersChange = (newMembers: Member[]): void => {
-//     setMembers(newMembers);
-    
-//     // Update balances to include new members or remove old ones
-//     const newBalances: Balance = {};
-//     newMembers.forEach(member => {
-//       newBalances[member.name] = balances[member.name] || 0;
-//     });
-//     setBalances(newBalances);
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 p-4">
-//       <Toaster position="top-center" />
-      
-//       <div className="max-w-md mx-auto">
-//         {/* ✅ Updated Header with History Button */}
-//         <div className="text-center mb-6">
-//           <div className="flex items-center justify-center gap-2 mb-2">
-//             <h1 className="text-3xl font-bold text-black">
-//               🍵 Tea Expense Tracker
-//             </h1>
-//             <button
-//               onClick={() => setCurrentView('members')}
-//               className="text-blue-600 hover:text-blue-800 p-1"
-//               title="Manage members"
-//             >
-//               👥
-//             </button>
-//             {/* ✅ New History Button */}
-//             <button
-//               onClick={() => setCurrentView('history')}
-//               className="text-purple-600 hover:text-purple-800 p-1"
-//               title="View expense history"
-//             >
-//               📊
-//             </button>
-//           </div>
-//           <p className="text-gray-600">
-//             Track and split tea expenses fairly • {activeMemberNames.length} members • {expenses.length} total expenses
-//           </p>
-//         </div>
-
-//         {/* Balance Overview */}
-//         <BalanceView balances={balances} />
-
-//         {/* ✅ Updated Main Content Section */}
-//         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-//           {/* ✅ Members Management View */}
-//           {currentView === 'members' && (
-//             <MemberManager 
-//               members={members}
-//               onMembersChange={handleMembersChange}
-//               onClose={() => setCurrentView('menu')}
-//             />
-//           )}
-
-//           {/* ✅ New Expense History View */}
-//           {currentView === 'history' && (
-//             <ExpenseHistory 
-//               expenses={expenses}
-//               members={members}
-//               onClose={() => setCurrentView('menu')}
-//             />
-//           )}
-
-//           {/* Expense Entry Views */}
-//           {currentView !== 'members' && currentView !== 'history' && (
-//             <>
-//               <div className="flex items-center justify-between mb-4">
-//                 <h2 className="text-xl font-semibold">Add New Expense</h2>
-//                 {currentView !== 'menu' && (
-//                   <button
-//                     onClick={resetToMenu}
-//                     className="text-sm text-gray-500 hover:text-gray-700"
-//                   >
-//                     ← Back
-//                   </button>
-//                 )}
-//               </div>
-              
-//               {/* ✅ Updated Main Menu with History Option */}
-//               {currentView === 'menu' && (
-//                 <div className="space-y-3">
-//                   {/* Primary Actions */}
-//                   <div className="grid grid-cols-2 gap-3">
-//                     <button
-//                       onClick={() => setCurrentView('qr')}
-//                       className="bg-blue-500 text-white p-4 rounded-lg font-medium hover:bg-blue-600 flex flex-col items-center gap-2"
-//                     >
-//                       <span className="text-2xl">📱</span>
-//                       <span>Scan QR Code</span>
-//                       <span className="text-xs opacity-75">Auto-capture details</span>
-//                     </button>
-//                     <button
-//                       onClick={() => setCurrentView('manual')}
-//                       className="bg-green-500 text-white p-4 rounded-lg font-medium hover:bg-green-600 flex flex-col items-center gap-2"
-//                     >
-//                       <span className="text-2xl">✏️</span>
-//                       <span>Manual Entry</span>
-//                       <span className="text-xs opacity-75">Type details</span>
-//                     </button>
-//                   </div>
-                  
-//                   {/* ✅ New History & Analytics Button */}
-//                   <button
-//                     onClick={() => setCurrentView('history')}
-//                     className="w-full bg-purple-500 text-white p-4 rounded-lg font-medium hover:bg-purple-600 flex items-center justify-center gap-2"
-//                   >
-//                     <span className="text-xl">📊</span>
-//                     <span>View History & Analytics</span>
-//                     <span className="text-sm opacity-75">({expenses.length} expenses)</span>
-//                   </button>
-//                 </div>
-//               )}
-              
-//               {currentView === 'qr' && (
-//                 <QRScanner 
-//                   onQRScanned={handleQRScanned}
-//                   onCancel={resetToMenu}
-//                 />
-//               )}
-
-//               {currentView === 'manual' && (
-//                 <ExpenseForm 
-//                   onSubmit={addExpense} 
-//                   members={activeMemberNames}
-//                   initialData={qrData || undefined}
-//                 />
-//               )}
-//             </>
-//           )}
-//         </div>
-
-//         {/* ✅ Updated Recent Expenses (Only show when not in members or history view) */}
-//         {currentView !== 'members' && currentView !== 'history' && (
-//           <div className="bg-white rounded-lg shadow-lg p-6">
-//             <div className="flex justify-between items-center mb-4">
-//               <h2 className="text-xl font-semibold">Recent Expenses</h2>
-//               {expenses.length > 5 && (
-//                 <button
-//                   onClick={() => setCurrentView('history')}
-//                   className="text-purple-600 hover:text-purple-800 text-sm"
-//                 >
-//                   View All →
-//                 </button>
-//               )}
-//             </div>
-            
-//             {expenses.length === 0 ? (
-//               <p className="text-gray-500 text-center py-8">
-//                 No expenses yet. Add your first tea expense above! ☝️
-//               </p>
-//             ) : (
-//               <div className="space-y-3">
-//                 {expenses.slice(0, 5).map((expense) => (
-//                   <div key={expense.id} className="border-l-4 border-blue-500 pl-4 py-2">
-//                     <div className="flex justify-between items-start">
-//                       <div className="flex-1">
-//                         <p className="font-medium">{expense.description}</p>
-//                         <p className="text-sm text-gray-600">
-//                           Paid by {expense.paidBy} • {expense.date} {expense.time}
-//                         </p>
-//                         {expense.location && expense.location !== 'Manual Entry' && (
-//                           <p className="text-xs text-gray-500">📍 {expense.location}</p>
-//                         )}
-//                         {expense.autoFilled && (
-//                           <span className="inline-block text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded mt-1">
-//                             📱 QR Auto-filled
-//                           </span>
-//                         )}
-//                       </div>
-//                       <div className="text-right ml-4">
-//                         <p className="font-bold text-lg">₹{expense.amount}</p>
-//                         <p className="text-sm text-gray-600">₹{expense.perPersonCost.toFixed(2)} each</p>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 ))}
-                
-//                 {expenses.length > 5 && (
-//                   <div className="text-center pt-3 border-t">
-//                     <button
-//                       onClick={() => setCurrentView('history')}
-//                       className="text-purple-600 hover:text-purple-800 text-sm font-medium"
-//                     >
-//                       📊 View All {expenses.length} Expenses & Analytics →
-//                     </button>
-//                   </div>
-//                 )}
-//               </div>
-//             )}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -327,14 +10,8 @@ import ExpenseHistory from '@/components/ExpenseHistory';
 import { Expense, Balance, QRExpenseData, Member } from '@/types';
 import { calculateSplit, updateBalances } from '@/lib/utils';
 
-// ✅ Default members (can be customized)
-const DEFAULT_MEMBERS: Member[] = [
-  { id: '1', name: 'John', isActive: true },
-  { id: '2', name: 'Raj', isActive: true },
-  { id: '3', name: 'Priya', isActive: true },
-  { id: '4', name: 'Amit', isActive: true },
-  { id: '5', name: 'Sarah', isActive: true },
-];
+// ✅ Start with empty members array - no static defaults
+const DEFAULT_MEMBERS: Member[] = [];
 
 // ✅ Updated ViewType to include 'history'
 type ViewType = 'menu' | 'qr' | 'manual' | 'members' | 'history';
@@ -343,7 +20,7 @@ export default function TeaTracker(): JSX.Element {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [members, setMembers] = useState<Member[]>(DEFAULT_MEMBERS);
   const [balances, setBalances] = useState<Balance>({});
-  const [currentView, setCurrentView] = useState<ViewType>('menu');
+  const [currentView, setCurrentView] = useState<ViewType>('members'); // ✅ Start with members view if empty
   const [qrData, setQrData] = useState<QRExpenseData | null>(null);
 
   // Initialize balances when members change
@@ -355,6 +32,13 @@ export default function TeaTracker(): JSX.Element {
     setBalances(initialBalances);
   }, [members]);
 
+  // ✅ Auto-redirect to members view if no members exist
+  useEffect(() => {
+    if (members.length === 0 && currentView === 'menu') {
+      setCurrentView('members');
+    }
+  }, [members.length, currentView]);
+
   // Load data from localStorage
   useEffect(() => {
     const savedExpenses = localStorage.getItem('tea-expenses');
@@ -365,7 +49,12 @@ export default function TeaTracker(): JSX.Element {
       setExpenses(JSON.parse(savedExpenses));
     }
     if (savedMembers) {
-      setMembers(JSON.parse(savedMembers));
+      const parsedMembers = JSON.parse(savedMembers);
+      setMembers(parsedMembers);
+      // ✅ If members exist, go to menu, otherwise stay in members view
+      if (parsedMembers.length > 0) {
+        setCurrentView('menu');
+      }
     }
     if (savedBalances) {
       setBalances(JSON.parse(savedBalances));
@@ -382,6 +71,13 @@ export default function TeaTracker(): JSX.Element {
   const activeMemberNames = members.filter(m => m.isActive).map(m => m.name);
 
   const addExpense = (expenseData: QRExpenseData): void => {
+    // ✅ Check if there are active members before adding expense
+    if (activeMemberNames.length === 0) {
+      toast.error('Please add team members first');
+      setCurrentView('members');
+      return;
+    }
+
     if (!expenseData.amount || !expenseData.paidBy) {
       toast.error('Please fill all required fields');
       return;
@@ -412,6 +108,13 @@ export default function TeaTracker(): JSX.Element {
   };
 
   const handleQRScanned = (scannedData: QRExpenseData): void => {
+    // ✅ Check if there are active members before scanning
+    if (activeMemberNames.length === 0) {
+      toast.error('Please add team members first');
+      setCurrentView('members');
+      return;
+    }
+
     setQrData(scannedData);
     setCurrentView('manual');
     
@@ -430,7 +133,13 @@ export default function TeaTracker(): JSX.Element {
   };
 
   const resetToMenu = (): void => {
-    setCurrentView('menu');
+    // ✅ Only go to menu if members exist
+    if (members.length === 0) {
+      setCurrentView('members');
+      toast('Please add team members first', { icon: '👥' });
+    } else {
+      setCurrentView('menu');
+    }
     setQrData(null);
   };
 
@@ -443,6 +152,12 @@ export default function TeaTracker(): JSX.Element {
       newBalances[member.name] = balances[member.name] || 0;
     });
     setBalances(newBalances);
+
+    // ✅ Auto-redirect to menu when first members are added
+    if (newMembers.length > 0 && members.length === 0) {
+      toast.success('✅ Team members added! You can now start tracking expenses');
+      setTimeout(() => setCurrentView('menu'), 1000);
+    }
   };
 
   return (
@@ -450,53 +165,62 @@ export default function TeaTracker(): JSX.Element {
       <Toaster position="top-center" />
       
       <div className="max-w-md mx-auto">
-        {/* ✅ Enhanced Header with Modern Styling */}
+        {/* ✅ Enhanced Header with conditional display */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-3 mb-3">
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-2 rounded-xl shadow-lg">
               <span className="text-2xl">🍵</span>
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              Tea Expense Tracker
+               Expense Tracker
             </h1>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentView('members')}
-                className="bg-white/70 backdrop-blur-sm text-slate-600 hover:text-indigo-600 hover:bg-white/90 p-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                className={`bg-white/70 backdrop-blur-sm ${
+                  members.length === 0 ? 'text-orange-600 animate-pulse' : 'text-slate-600 hover:text-indigo-600'
+                } hover:bg-white/90 p-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200`}
                 title="Manage members"
               >
                 👥
               </button>
-              <button
-                onClick={() => setCurrentView('history')}
-                className="bg-white/70 backdrop-blur-sm text-slate-600 hover:text-violet-600 hover:bg-white/90 p-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
-                title="View expense history"
-              >
-                📊
-              </button>
+              {/* ✅ Only show history button if members exist */}
+              {members.length > 0 && (
+                <button
+                  onClick={() => setCurrentView('history')}
+                  className="bg-white/70 backdrop-blur-sm text-slate-600 hover:text-violet-600 hover:bg-white/90 p-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                  title="View expense history"
+                >
+                  📊
+                </button>
+              )}
             </div>
           </div>
           <p className="text-slate-600 text-sm">
-            Track and split tea expenses fairly • {activeMemberNames.length} members • {expenses.length} total expenses
+            {members.length === 0 ? (
+              <span className="text-orange-600 font-medium">👆 Add team members to start tracking expenses</span>
+            ) : (
+              <>Track and split tea expenses fairly • {activeMemberNames.length} members • {expenses.length} total expenses</>
+            )}
           </p>
         </div>
 
-        {/* Enhanced Balance Overview */}
-        <BalanceView balances={balances} />
+        {/* ✅ Conditional Balance Overview - only show if members exist */}
+        {members.length > 0 && <BalanceView balances={balances} />}
 
-        {/* ✅ Enhanced Main Content Section with Modern Card Design */}
+        {/* ✅ Enhanced Main Content Section with empty state handling */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 mb-6">
           {/* ✅ Members Management View */}
           {currentView === 'members' && (
             <MemberManager 
               members={members}
               onMembersChange={handleMembersChange}
-              onClose={() => setCurrentView('menu')}
+              onClose={() => members.length > 0 ? setCurrentView('menu') : null}
             />
           )}
 
-          {/* ✅ Expense History View */}
-          {currentView === 'history' && (
+          {/* ✅ Expense History View - only accessible if members exist */}
+          {currentView === 'history' && members.length > 0 && (
             <ExpenseHistory 
               expenses={expenses}
               members={members}
@@ -504,8 +228,8 @@ export default function TeaTracker(): JSX.Element {
             />
           )}
 
-          {/* Expense Entry Views */}
-          {currentView !== 'members' && currentView !== 'history' && (
+          {/* ✅ Expense Entry Views - only show if members exist */}
+          {currentView !== 'members' && currentView !== 'history' && members.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-slate-800">Add New Expense</h2>
@@ -519,7 +243,7 @@ export default function TeaTracker(): JSX.Element {
                 )}
               </div>
               
-              {/* ✅ Enhanced Main Menu with Modern Button Design */}
+              {/* ✅ Main Menu */}
               {currentView === 'menu' && (
                 <div className="space-y-4">
                   {/* Primary Actions with Gradient Buttons */}
@@ -533,7 +257,6 @@ export default function TeaTracker(): JSX.Element {
                       </div>
                       <span className="font-semibold">Scan QR Code</span>
                       <span className="text-xs opacity-80">Auto-capture details</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 to-cyan-400/0 group-hover:from-blue-400/20 group-hover:to-cyan-400/20 rounded-xl transition-all duration-200"></div>
                     </button>
                     <button
                       onClick={() => setCurrentView('manual')}
@@ -544,24 +267,24 @@ export default function TeaTracker(): JSX.Element {
                       </div>
                       <span className="font-semibold">Manual Entry</span>
                       <span className="text-xs opacity-80">Type details</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/0 to-teal-400/0 group-hover:from-emerald-400/20 group-hover:to-teal-400/20 rounded-xl transition-all duration-200"></div>
                     </button>
                   </div>
                   
-                  {/* ✅ Enhanced History & Analytics Button */}
-                  <button
-                    onClick={() => setCurrentView('history')}
-                    className="group relative w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white p-5 rounded-xl font-medium hover:from-violet-600 hover:to-purple-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3"
-                  >
-                    <div className="bg-white/20 backdrop-blur-sm rounded-lg p-1.5 group-hover:bg-white/30 transition-all duration-200">
-                      <span className="text-xl">📊</span>
-                    </div>
-                    <span className="font-semibold">View History & Analytics</span>
-                    <span className="text-sm opacity-80 bg-white/20 px-2 py-1 rounded-full">
-                      {expenses.length} expenses
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-violet-400/0 to-purple-400/0 group-hover:from-violet-400/20 group-hover:to-purple-400/20 rounded-xl transition-all duration-200"></div>
-                  </button>
+                  {/* ✅ History & Analytics Button - only show if expenses exist */}
+                  {expenses.length > 0 && (
+                    <button
+                      onClick={() => setCurrentView('history')}
+                      className="group relative w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white p-5 rounded-xl font-medium hover:from-violet-600 hover:to-purple-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3"
+                    >
+                      <div className="bg-white/20 backdrop-blur-sm rounded-lg p-1.5 group-hover:bg-white/30 transition-all duration-200">
+                        <span className="text-xl">📊</span>
+                      </div>
+                      <span className="font-semibold">View History & Analytics</span>
+                      <span className="text-sm opacity-80 bg-white/20 px-2 py-1 rounded-full">
+                        {expenses.length} expenses
+                      </span>
+                    </button>
+                  )}
                 </div>
               )}
               
@@ -581,10 +304,29 @@ export default function TeaTracker(): JSX.Element {
               )}
             </>
           )}
+
+          {/* ✅ Empty State Message when no members */}
+          {currentView !== 'members' && members.length === 0 && (
+            <div className="text-center py-12">
+              <div className="bg-gradient-to-r from-orange-500 to-amber-500 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <span className="text-3xl">👥</span>
+              </div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-3">Add Team Members First</h3>
+              <p className="text-slate-600 mb-6">
+                You need to add team members before you can start tracking and splitting expenses.
+              </p>
+              <button
+                onClick={() => setCurrentView('members')}
+                className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:from-indigo-600 hover:to-blue-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+              >
+                👥 Add Team Members
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* ✅ Enhanced Recent Expenses with Modern Card Design */}
-        {currentView !== 'members' && currentView !== 'history' && (
+        {/* ✅ Recent Expenses - only show if members and expenses exist */}
+        {currentView !== 'members' && currentView !== 'history' && members.length > 0 && (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-xl font-semibold text-slate-800">Recent Expenses</h2>
@@ -600,11 +342,11 @@ export default function TeaTracker(): JSX.Element {
             
             {expenses.length === 0 ? (
               <div className="text-center py-12">
-                <div className="bg-gradient-to-r from-amber-500 to-orange-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                {/* <div className="bg-gradient-to-r from-amber-500 to-orange-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <span className="text-2xl">🍵</span>
-                </div>
+                </div> */}
                 <p className="text-slate-500">
-                  No expenses yet. Add your first tea expense above! ☝️
+                  No expenses yet. Add your first tea expense above! 
                 </p>
               </div>
             ) : (
