@@ -813,7 +813,7 @@ export default function ExpenseHistory({
         {Object.keys(statistics.memberSpending).length > 0 && (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
             <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-              <span>👥</span> Member Spending Breakdown
+              Member Spending Breakdown
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(statistics.memberSpending)
